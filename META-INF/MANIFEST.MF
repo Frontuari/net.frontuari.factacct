@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Factacct
+Bundle-SymbolicName: net.frontuari.factacct;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: net.frontuari.factacct
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.adempiere.base;bundle-version="7.1.0",
+ org.adempiere.plugin.utils;bundle-version="7.1.0"
+Import-Package: org.osgi.service.event
+Service-Component: OSGI-INF/FTU_EventFactory.xml
+Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
+Bundle-ActivationPolicy: lazy

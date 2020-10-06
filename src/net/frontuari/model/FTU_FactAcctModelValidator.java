@@ -85,31 +85,31 @@ public class FTU_FactAcctModelValidator extends AbstractEventHandler
 			if(table.getTableName().equalsIgnoreCase("C_Invoice")) {
 				
 				poDoc = new MInvoice (po.getCtx(),recorId,po.get_TrxName());
-				docTypeId = (int)poDoc.get_Value("C_DocType_ID");
+				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
 				documentNo = poDoc.get_Value("DocumentNo").toString();
 				if(recorLineId>0) {
 				poLine = new MInvoiceLine (po.getCtx(),recorLineId,po.get_TrxName());
-				chargeId = (int)poLine.get_Value("C_Charge_ID");
+				chargeId = poLine.get_ValueAsInt("C_Charge_ID");
 				}
 				
 			}else if(table.getTableName().equalsIgnoreCase("M_InOut")) {
 				
 				poDoc = new MInOut (po.getCtx(),recorId,po.get_TrxName());
-				docTypeId = (int)poDoc.get_Value("C_DocType_ID");
+				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
 				documentNo = poDoc.get_Value("DocumentNo").toString();
 				if(recorLineId>0) {
 					poLine = new MInOutLine (po.getCtx(),recorLineId,po.get_TrxName());
-					chargeId = (int)poLine.get_Value("C_Charge_ID");
+					chargeId = poLine.get_ValueAsInt("C_Charge_ID");
 					}
 				
 			}else if(table.getTableName().equalsIgnoreCase("C_Payment")) {
 				
 				poDoc = new MPayment (po.getCtx(),recorId,po.get_TrxName());
-				docTypeId = (int)poDoc.get_Value("C_DocType_ID");
+				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
 				documentNo = poDoc.get_Value("DocumentNo").toString();
 				//if(recorLineId>0) {
 					//poLine = new MPayment (po.getCtx(),recorLineId,po.get_TrxName());
-					chargeId = (int)poDoc.get_Value("C_Charge_ID");
+					chargeId = poDoc.get_ValueAsInt("C_Charge_ID");
 					//}
 			}
 			

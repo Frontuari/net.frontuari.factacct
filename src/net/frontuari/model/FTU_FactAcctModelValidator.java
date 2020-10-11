@@ -1,14 +1,14 @@
 package net.frontuari.model;
 
-
-
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.IEventTopics;
-import org.adempiere.exceptions.AdempiereException;
 import org.compiere.acct.FactLine;
-import org.compiere.model.MBPartner;
+import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MAllocationLine;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
+import org.compiere.model.MInventory;
+import org.compiere.model.MInventoryLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MPayment;
@@ -33,9 +33,6 @@ public class FTU_FactAcctModelValidator extends AbstractEventHandler
 	 */
 	@Override
 	protected void initialize() {
-		//registerTableEvent(IEventTopics.PO_BEFORE_NEW, MBPartner.Table_Name);
-		//registerTableEvent(IEventTopics.PO_BEFORE_CHANGE, MBPartner.Table_Name);
-
 		registerTableEvent(IEventTopics.PO_AFTER_NEW, FactLine.Table_Name);
 		registerTableEvent(IEventTopics.PO_AFTER_CHANGE, FactLine.Table_Name);
 	}	//	initialize
@@ -52,22 +49,8 @@ public class FTU_FactAcctModelValidator extends AbstractEventHandler
 		PO po = getPO(event);
 		String type = event.getTopic();
 		log.info(po + " Type: " + type);
-		String msg;
-
-		// Check Digit based on TaxID
-		if (po.get_TableName().equals(MBPartner.Table_Name) && ( type.equals(IEventTopics.PO_BEFORE_NEW) || type.equals(IEventTopics.PO_BEFORE_CHANGE)))
-		{
-			MBPartner bpartner = (MBPartner)po;
-		/*	msg = "";//mcheckTaxIdDigit(bpartner);
-			if (msg != null)
-				throw new RuntimeException(msg);
-
-			msg = "";//mfillName(bpartner);
-			if (msg != null)
-				throw new RuntimeException(msg);*/
-		}
 		
-		if (po.get_TableName().equals(FactLine.Table_Name) && ( type.equals(IEventTopics.PO_AFTER_NEW) /*|| type.equals(IEventTopics.PO_AFTER_CHANGE)*/))
+		if (po.get_TableName().equals(FactLine.Table_Name) && ( type.equals(IEventTopics.PO_AFTER_NEW)))
 		{
 			FactLine factLine = (FactLine)po;
 			
@@ -86,31 +69,49 @@ public class FTU_FactAcctModelValidator extends AbstractEventHandler
 				
 				poDoc = new MInvoice (po.getCtx(),recorId,po.get_TrxName());
 				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
-				documentNo = poDoc.get_Value("DocumentNo").toString();
+				documentNo = poDoc.get_ValueAsString("DocumentNo");
 				if(recorLineId>0) {
-				poLine = new MInvoiceLine (po.getCtx(),recorLineId,po.get_TrxName());
-				chargeId = poLine.get_ValueAsInt("C_Charge_ID");
+					poLine = new MInvoiceLine (po.getCtx(),recorLineId,po.get_TrxName());
+					chargeId = poLine.get_ValueAsInt("C_Charge_ID");
 				}
 				
 			}else if(table.getTableName().equalsIgnoreCase("M_InOut")) {
 				
 				poDoc = new MInOut (po.getCtx(),recorId,po.get_TrxName());
 				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
-				documentNo = poDoc.get_Value("DocumentNo").toString();
+				documentNo = poDoc.get_ValueAsString("DocumentNo");
 				if(recorLineId>0) {
 					poLine = new MInOutLine (po.getCtx(),recorLineId,po.get_TrxName());
 					chargeId = poLine.get_ValueAsInt("C_Charge_ID");
-					}
+				}
 				
 			}else if(table.getTableName().equalsIgnoreCase("C_Payment")) {
 				
 				poDoc = new MPayment (po.getCtx(),recorId,po.get_TrxName());
 				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
-				documentNo = poDoc.get_Value("DocumentNo").toString();
-				//if(recorLineId>0) {
-					//poLine = new MPayment (po.getCtx(),recorLineId,po.get_TrxName());
-					chargeId = poDoc.get_ValueAsInt("C_Charge_ID");
-					//}
+				documentNo = poDoc.get_ValueAsString("DocumentNo");
+				chargeId = poDoc.get_ValueAsInt("C_Charge_ID");
+			}
+			//	Support for register changes when it's M_Inventory, C_AllocationHdr
+			else if(table.getTableName().equalsIgnoreCase("M_Inventory"))
+			{
+				poDoc = new MInventory (po.getCtx(),recorId,po.get_TrxName());
+				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
+				documentNo = poDoc.get_ValueAsString("DocumentNo");
+				if(recorLineId>0) {
+					poLine = new MInventoryLine (po.getCtx(),recorLineId,po.get_TrxName());
+					chargeId = poLine.get_ValueAsInt("C_Charge_ID");
+				}
+			}
+			else if(table.getTableName().equalsIgnoreCase("C_AllocationHdr"))
+			{
+				poDoc = new MAllocationHdr (po.getCtx(),recorId,po.get_TrxName());
+				docTypeId = poDoc.get_ValueAsInt("C_DocType_ID");
+				documentNo = poDoc.get_ValueAsString("DocumentNo");
+				if(recorLineId>0) {
+					poLine = new MAllocationLine (po.getCtx(),recorLineId,po.get_TrxName());
+					chargeId = poLine.get_ValueAsInt("C_Charge_ID");
+				}
 			}
 			
 			if(docTypeId>0)
@@ -122,16 +123,7 @@ public class FTU_FactAcctModelValidator extends AbstractEventHandler
 			if(documentNo!=null || (!documentNo.equals("")))
 				factLine.set_ValueOfColumn("DocumentNo", documentNo);
 			
-			
-			
 			factLine.saveEx(po.get_TrxName());
-		}		
-		
-	}	//	doHandleEvent
-	
-	
-
-	
-}	//	FTU_FactAcctModelValidator
-
-
+		}
+	}	
+}
